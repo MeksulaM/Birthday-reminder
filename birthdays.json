@@ -2,28 +2,16 @@
     "person01": {
         "first_name": "joe",
         "last_name": "rogan",
-        "birthday": {
-            "day": 11,
-            "month": 9,
-            "year": 1967
-        }
+        "birthday": "11.9.1967"
     },
     "person02": {
         "first_name": "dana",
         "last_name": "white",
-        "birthday": {
-            "day": 29,
-            "month": 7,
-            "year": 1969
-        }
+        "birthday": "29.7.1969"
     },
     "person03": {
         "first_name": "jon",
         "last_name": "anik",
-        "birthday": {
-            "day": 3,
-            "month": 7,
-            "year": 1978
-        }
+        "birthday": "3.7.1978"
     }
 }
