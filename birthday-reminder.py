@@ -25,15 +25,17 @@ def store_data_in_dict(data: dict):
 
 def show_all_persons(birthdays: dict):
 
-    print('We know birthdays of:')
+    print('\nWe know birthdays of:')
     for name in birthdays:
         print(name)
 
 
 def show_birthday(birthdays: dict):
 
-    user_input = input("Who's birthday do you want to check?: ")
-    print(f'{user_input} birthday is {birthdays[user_input]}')
+    user_input = input("\nWho's birthday do you want to check?: ").title()
+    bday = birthdays[user_input].date()
+    bday = bday.strftime("%d.%m.%Y")
+    print(f"{user_input}'s birthday is {bday}")
 
 
 def add_bday_to_json(filename: str):
@@ -41,9 +43,9 @@ def add_bday_to_json(filename: str):
     data = get_json_data(filename)
     new_person_info = {}
 
-    first_name = input('First name: ')
+    first_name = input('\nFirst name: ')
     last_name = input('Last name: ')
-    birthday = input('Birthday: ')
+    birthday = input('Birthday (format: DD.MM.YYYY): ')
 
     new_person_info['first_name'] = first_name
     new_person_info['last_name'] = last_name
@@ -58,6 +60,9 @@ def add_bday_to_json(filename: str):
 
     with open(filename, 'w') as file:
         json.dump(data, file)
+
+    full_name = first_name + ' ' + last_name
+    print(f"{full_name.title()}'s birthday added succsessfully")
 
 
 def get_actual_data(filename: str):
@@ -74,6 +79,7 @@ def main():
     data, birthdays = get_actual_data(filename)
 
     while True:
+        print()
         print("1: Show persons list")
         print("2: Check someone's birthday")
         print("3: Add someone's birthday")
