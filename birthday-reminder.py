@@ -59,6 +59,23 @@ def show_birthday(birthdays: dict):
 def add_bday_to_json(data: dict, filename: str):
     """This function allows user to add someone's birthday to json"""
 
+    # creating dict with new person's info
+    new_person_info = create_new_person_dict()
+
+    # updating 'data' with new person's info
+    data = update_local_data(data, new_person_info)
+
+    # updating json data
+    write_to_json(filename, data)
+
+    # printing fancy message to the user
+    full_name = new_person_info['first_name'] + ' ' + new_person_info['last_name']
+    print(f"{full_name.title()}'s birthday added succsessfully")
+
+
+def create_new_person_dict():
+    """Asking user to provide info, then storing info in dict"""
+
     # empty dictionary to store info about new person
     new_person_info = {}
 
@@ -71,6 +88,11 @@ def add_bday_to_json(data: dict, filename: str):
     new_person_info['first_name'] = first_name
     new_person_info['last_name'] = last_name
     new_person_info['birthday'] = birthday
+
+    return new_person_info
+
+
+def update_local_data(data: dict, new_person_info: dict):
 
     # determinig name of the new key in json dictionary
     # keys in json dict are named by convention 'person + number of a person'
@@ -85,13 +107,13 @@ def add_bday_to_json(data: dict, filename: str):
     # adding new key-value pair to data dictionary
     data[new_person] = new_person_info
 
-    # updating json data
+    return data
+
+
+def write_to_json(filename: str, data: dict):
+
     with open(filename, 'w') as file:
         json.dump(data, file)
-
-    # printing fancy message to the user
-    full_name = first_name + ' ' + last_name
-    print(f"{full_name.title()}'s birthday added succsessfully")
 
 
 def show_upcoming_birthdays(birthdays: dict):
@@ -159,6 +181,9 @@ def main():
     # program menu in while loop
     while True:
 
+        clear_console()
+        show_banner()
+
         # program functionalities
         print()
         print("1: Show persons list")
@@ -169,13 +194,17 @@ def main():
         choice = input('Type corresopnding number: ')
         if choice == '1':
             show_all_persons(birthdays)
+            input('')
         elif choice == '2':
             show_birthday(birthdays)
+            input('')
         elif choice == '3':
             add_bday_to_json(data, filename)
             data, birthdays = get_actual_data(filename)
+            input('')
         elif choice == '4':
             show_upcoming_birthdays(birthdays)
+            input('')
         else:
             break
 
