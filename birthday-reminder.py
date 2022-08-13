@@ -26,6 +26,7 @@ def store_data_in_dict(data: dict):
 
         # convert str to 'datetime' type
         birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
+        birthday = birthday.date()
 
         # adding key-value pair to birthday's dictionary
         birthdays[full_name] = birthday
@@ -39,7 +40,8 @@ def show_all_persons(birthdays: dict):
     print('\nWe know birthdays of:')
 
     # full names are keys in 'birthdays' dictionary
-    for name in birthdays:
+    names_sorted = sorted(birthdays.keys())
+    for name in names_sorted:
         print(name)
 
 
@@ -50,8 +52,8 @@ def show_birthday(birthdays: dict):
     user_input = input("\nWho's birthday do you want to check?: ").title()
 
     # formating output to DD.MM.YYYY
-    bday = birthdays[user_input].date()
-    bday = bday.strftime("%d.%m.%Y")
+    # bday = birthdays[user_input].date()
+    bday = birthdays[user_input].strftime("%d.%m.%Y")
 
     print(f"{user_input}'s birthday is {bday}")
 
@@ -119,6 +121,9 @@ def write_to_json(filename: str, data: dict):
 def show_upcoming_birthdays(birthdays: dict):
     """Showing upcoming birthdays within a one month"""
 
+    # sorting 'birthdays' by month, day
+    birthdays = dict(sorted(birthdays.items(), key=lambda x: (x[1].month, x[1].day)))
+
     # today's date
     now = datetime.now()
 
@@ -135,7 +140,7 @@ def show_upcoming_birthdays(birthdays: dict):
 
         # one of two conditions must be true
         if condition1 or condition2:
-            birthday = birthday.date().strftime("%d.%m.%Y")
+            birthday = birthday.strftime("%d.%m.%Y")
             print(f'{person}: {birthday}')
 
 
