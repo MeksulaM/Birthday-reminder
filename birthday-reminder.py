@@ -1,4 +1,5 @@
 import json
+from os import system
 from datetime import datetime
 
 
@@ -93,6 +94,29 @@ def add_bday_to_json(data: dict, filename: str):
     print(f"{full_name.title()}'s birthday added succsessfully")
 
 
+def show_upcoming_birthdays(birthdays: dict):
+    """Showing upcoming birthdays within a one month"""
+
+    # today's date
+    now = datetime.now()
+
+    for person, birthday in birthdays.items():
+
+        # condition 1 - when birthday is in upcoming month
+        # considering two cases: months from 1 to 11 and december
+        if now.month != 12:
+            condition1 = birthday.day <= now.day and birthday.month - now.month == 1
+        else:
+            condition1 = birthday.day <= now.day and birthday.month == 1
+        # condition 2 - when birthday is in the same month as now.month
+        condition2 = birthday.day >= now.day and birthday.month == now.month
+
+        # one of two conditions must be true
+        if condition1 or condition2:
+            birthday = birthday.date().strftime("%d.%m.%Y")
+            print(f'{person}: {birthday}')
+
+
 def get_actual_data(filename: str):
     """Update stored data after e.g. adding someone's birthday"""
 
@@ -100,6 +124,31 @@ def get_actual_data(filename: str):
     birthdays = store_data_in_dict(data)
 
     return data, birthdays
+
+
+def clear_console():
+    """Clearing console"""
+
+    system('cls')
+
+
+def show_banner():
+    banner = """
+
+888           888                                                        d8b               888                  
+888           888                                                        Y8P               888                  
+888           888                                                                          888                  
+88888b.   .d88888  8888b.  888  888       888d888  .d88b.  88888b.d88b.  888 88888b.   .d88888  .d88b.  888d888 
+888 "88b d88" 888     "88b 888  888       888P"   d8P  Y8b 888 "888 "88b 888 888 "88b d88" 888 d8P  Y8b 888P"   
+888  888 888  888 .d888888 888  888       888     88888888 888  888  888 888 888  888 888  888 88888888 888     
+888 d88P Y88b 888 888  888 Y88b 888       888     Y8b.     888  888  888 888 888  888 Y88b 888 Y8b.     888     
+88888P"   "Y88888 "Y888888  "Y88888       888      "Y8888  888  888  888 888 888  888  "Y88888  "Y8888  888     
+                                888                                                                             
+                           Y8b d88P                                                                             
+                            "Y88P"                                                                              
+
+    """
+    print(banner)
 
 
 def main():
@@ -125,6 +174,8 @@ def main():
         elif choice == '3':
             add_bday_to_json(data, filename)
             data, birthdays = get_actual_data(filename)
+        elif choice == '4':
+            show_upcoming_birthdays(birthdays)
         else:
             break
 
