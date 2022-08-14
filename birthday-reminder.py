@@ -58,6 +58,33 @@ def show_birthday(birthdays: dict):
     print(f"{user_input}'s birthday is {bday}")
 
 
+def delete_bday(data: dict, filename: str):
+
+    print('\nWho to delete?:')
+    first_name = input('first name: ')
+    last_name = input('last name: ')
+
+    for person, info in data.items():
+        condition1 = first_name == info['first_name']
+        condition2 = last_name == info['last_name']
+        if condition1 and condition2:
+            person_to_del = person
+
+    del data[person_to_del]
+
+    data_formated = {}
+
+    id = 1
+    for person, info in data.items():
+        data_formated['person' + str(id)] = info
+        id += 1
+
+    write_to_json(filename, data_formated)
+
+    full_name = first_name + ' ' + last_name
+    print(f"{full_name.title()}'s birthday removed successfully")
+
+
 def add_bday_to_json(data: dict, filename: str):
     """This function allows user to add someone's birthday to json"""
 
@@ -127,6 +154,7 @@ def show_upcoming_birthdays(birthdays: dict):
     # today's date
     now = datetime.now()
 
+    print()
     for person, birthday in birthdays.items():
 
         # condition 1 - when birthday is in upcoming month
@@ -209,6 +237,10 @@ def main():
             input('')
         elif choice == '4':
             show_upcoming_birthdays(birthdays)
+            input('')
+        elif choice == '5':
+            delete_bday(data, filename)
+            data, birthdays = get_actual_data(filename)
             input('')
         else:
             break
