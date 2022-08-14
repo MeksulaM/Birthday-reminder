@@ -45,7 +45,7 @@ def show_all_persons(birthdays: dict):
         print(name)
 
 
-def show_birthday(birthdays: dict):
+def show_person_bday(birthdays: dict):
     """Print choosen person's birthday"""
 
     # asking user for input
@@ -58,41 +58,69 @@ def show_birthday(birthdays: dict):
     print(f"{user_input}'s birthday is {bday}")
 
 
-def delete_bday(data: dict, filename: str):
+def delete_person_bday(data: dict, filename: str):
+    """Deleting key-value pair from json dict"""
 
+    # finding dictionary key and creating variables for message at the end
+    person_to_del, first_name, last_name = find_dict_key(data)
+
+    # deleting key-value pair from dictionary
+    del data[person_to_del]
+
+    # format keys names after removing one key-value pair
+    data_formated = format_keys_names(data)
+
+    # updating json data
+    write_to_json(filename, data_formated)
+
+    # printing fancy message to the user
+    full_name = first_name + ' ' + last_name
+    print(f"{full_name.title()}'s birthday removed successfully")
+
+
+def find_dict_key(data: dict):
+    """Return key that matches user inputs"""
+
+    # asking user who to delete
     print('\nWho to delete?:')
     first_name = input('first name: ')
     last_name = input('last name: ')
 
+    # finding key name that matches user inputs
     for person, info in data.items():
         condition1 = first_name == info['first_name']
         condition2 = last_name == info['last_name']
         if condition1 and condition2:
             person_to_del = person
 
-    del data[person_to_del]
+    return person_to_del, first_name, last_name
 
+
+def format_keys_names(data: dict):
+    """formating keys names"""
+
+    # empty dictionary to store values from old 'data'
     data_formated = {}
 
+    # 'id' - variable for keys numeration
     id = 1
-    for person, info in data.items():
+    for info in data.values():
+        # copying values from 'data' to 'data_formated'
         data_formated['person' + str(id)] = info
         id += 1
+    del data
 
-    write_to_json(filename, data_formated)
-
-    full_name = first_name + ' ' + last_name
-    print(f"{full_name.title()}'s birthday removed successfully")
+    return data_formated
 
 
-def add_bday_to_json(data: dict, filename: str):
+def add_person_bday(data: dict, filename: str):
     """This function allows user to add someone's birthday to json"""
 
     # creating dict with new person's info
     new_person_info = create_new_person_dict()
 
     # updating 'data' with new person's info
-    data = update_local_data(data, new_person_info)
+    data = add_key_value(data, new_person_info)
 
     # updating json data
     write_to_json(filename, data)
@@ -121,7 +149,7 @@ def create_new_person_dict():
     return new_person_info
 
 
-def update_local_data(data: dict, new_person_info: dict):
+def add_key_value(data: dict, new_person_info: dict):
 
     # determinig name of the new key in json dictionary
     # keys in json dict are named by convention 'person + number of a person'
@@ -145,7 +173,7 @@ def write_to_json(filename: str, data: dict):
         json.dump(data, file)
 
 
-def show_upcoming_birthdays(birthdays: dict):
+def show_upcoming_bdays(birthdays: dict):
     """Showing upcoming birthdays within a one month"""
 
     # sorting 'birthdays' by month, day
@@ -172,7 +200,7 @@ def show_upcoming_birthdays(birthdays: dict):
             print(f'{person}: {birthday}')
 
 
-def get_actual_data(filename: str):
+def refresh_data(filename: str):
     """Update stored data after e.g. adding someone's birthday"""
 
     data = get_json_data(filename)
@@ -209,7 +237,7 @@ def show_banner():
 def main():
     filename = 'birthdays.json'
 
-    data, birthdays = get_actual_data(filename)
+    data, birthdays = refresh_data(filename)
 
     # program menu in while loop
     while True:
@@ -229,18 +257,18 @@ def main():
             show_all_persons(birthdays)
             input('')
         elif choice == '2':
-            show_birthday(birthdays)
+            show_person_bday(birthdays)
             input('')
         elif choice == '3':
-            add_bday_to_json(data, filename)
-            data, birthdays = get_actual_data(filename)
+            add_person_bday(data, filename)
+            data, birthdays = refresh_data(filename)
             input('')
         elif choice == '4':
-            show_upcoming_birthdays(birthdays)
+            show_upcoming_bdays(birthdays)
             input('')
         elif choice == '5':
-            delete_bday(data, filename)
-            data, birthdays = get_actual_data(filename)
+            delete_person_bday(data, filename)
+            data, birthdays = refresh_data(filename)
             input('')
         else:
             break
