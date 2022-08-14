@@ -154,11 +154,10 @@ def add_key_value(data: dict, new_person_info: dict):
     # determinig name of the new key in json dictionary
     # keys in json dict are named by convention 'person + number of a person'
     new_person = 'person'
+
     # accessing name of the last key
     person_id = list(data.keys())[-1][len(new_person):]
-    # for person in data:
-    #     # accessing number of a person
-    #     person_id = int(person[len(new_person):])
+
     # new key: person + number of the last person + 1
     new_person += str(int(person_id) + 1)
 
