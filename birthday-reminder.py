@@ -25,8 +25,9 @@ def store_data_in_dict(data: dict):
         full_name = full_name.title()
 
         # convert str to 'datetime' type
-        birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
+        birthday = datetime.strptime(info['birthday'], '%Y-%m-%d')
         birthday = birthday.date()
+        # birthday = info['birthday']
 
         # adding key-value pair to birthday's dictionary
         birthdays[full_name] = birthday
@@ -34,16 +35,23 @@ def store_data_in_dict(data: dict):
     return birthdays
 
 
-def show_all_persons(birthdays: dict):
+def show_all_bdays(birthdays: dict):
     """Print list of persons we know birthdays"""
 
-    if birthdays:
-        print('\nWe know birthdays of:')
+    # for calculating persosn's age
+    now = datetime.now()
+    # sorting 'birthdays' dict by keys, that is, full names
+    birthdays = dict(sorted(birthdays.items(), key=lambda x: x[0]))
 
-        # full names are keys in 'birthdays' dictionary
-        names_sorted = sorted(birthdays.keys())
-        for name in names_sorted:
-            print(name)
+    # if dict is not empty
+    if birthdays:
+        print()
+        for person, birthday in birthdays.items():
+            age = now.year - birthday.year
+            birthday = birthday.strftime("%d.%m.%Y")
+            print(f'\t-{person}: {birthday}, currently {age} years old')
+
+    # if dict is empty
     else:
         print('\nThere is no one to show')
         print("Please add someone's birthday")
@@ -52,15 +60,24 @@ def show_all_persons(birthdays: dict):
 def show_person_bday(birthdays: dict):
     """Print choosen person's birthday"""
 
+    # if dict is not empty
     if birthdays:
         # asking user for input
         user_input = input("\nWho's birthday do you want to check?: ").title()
 
-        # formating output to DD.MM.YYYY
-        # bday = birthdays[user_input].date()
-        bday = birthdays[user_input].strftime("%d.%m.%Y")
+        # checking if input is valid
+        if user_input in birthdays.keys():
 
-        print(f"{user_input}'s birthday is {bday}")
+            # formating output to DD.MM.YYYY
+            # bday = birthdays[user_input].date()
+            bday = birthdays[user_input].strftime("%d.%m.%Y")
+            print(f"{user_input}'s birthday is {bday}")
+
+        # for invalid input
+        else:
+            print('Incorrect input')
+
+    # if dict is empty
     else:
         print('\nThere is no one to show')
         print("Please add someone's birthday")
@@ -100,18 +117,27 @@ def find_dict_key(data: dict):
 
     # asking user who to delete
     full_name = input('\nWho to delete?: ')
-    first_name, last_name = full_name.split()
 
-    # finding key name that matches user inputs
-    for person, info in data.items():
-        condition1 = first_name == info['first_name']
-        condition2 = last_name == info['last_name']
-        if condition1 and condition2:
-            person_to_del = person
-            return person_to_del, first_name, last_name
+    # checking if input is valid
+    try:
+        first_name, last_name = full_name.split()
+    except ValueError:
+        print('Incorrect input')
+        return find_dict_key(data)
 
-    # if inputs does not match
-    return False, first_name, last_name
+    # if input is valid
+    else:
+
+        # finding key name that matches user inputs
+        for person, info in data.items():
+            condition1 = first_name == info['first_name']
+            condition2 = last_name == info['last_name']
+            if condition1 and condition2:
+                person_to_del = person
+                return person_to_del, first_name, last_name
+
+        # if inputs does not match
+        return False, first_name, last_name
 
 
 def format_keys_names(data: dict):
@@ -161,7 +187,7 @@ def create_new_person_dict():
     # asking user for new person info
     first_name = input('\nFirst name: ')
     last_name = input('Last name: ')
-    birthday = input('Birthday (format: DD.MM.YYYY): ')
+    birthday = bday_from_user()
 
     # adding inputs to dictionary
     new_person_info['first_name'] = first_name
@@ -171,9 +197,22 @@ def create_new_person_dict():
     return new_person_info
 
 
-def add_key_value(data: dict, new_person_info: dict):
+def bday_from_user():
+    """Validation of date input"""
 
-    # determinig name of the new key in json dictionary
+    birthday = input('Birthday (format: DD.MM.YYYY): ')
+    try:
+        birthday = datetime.strptime(birthday, '%d.%m.%Y').date()
+    except ValueError:
+        print('Incorrect input')
+        return bday_from_user()
+    else:
+        return birthday
+
+
+def add_key_value(data: dict, new_person_info: dict):
+    """determinig name of the new key in json dictionary"""
+
     # keys in json dict are named by convention 'person + number of a person'
     new_person = 'person'
 
@@ -192,12 +231,13 @@ def add_key_value(data: dict, new_person_info: dict):
 def write_to_json(filename: str, data: dict):
 
     with open(filename, 'w') as file:
-        json.dump(data, file)
+        json.dump(data, file, default=str, indent=4)
 
 
 def show_upcoming_bdays(birthdays: dict):
     """Showing upcoming birthdays within a one month"""
 
+    # flag checking if someone have birthday in a month
     zero_upcoming_bdays = True
 
     # sorting 'birthdays' by month, day
@@ -206,8 +246,7 @@ def show_upcoming_bdays(birthdays: dict):
     # today's date
     now = datetime.now()
 
-    print()
-    upcoming_bdays = {}
+    print('\nUpcoming birthdays:')
     for person, birthday in birthdays.items():
 
         # condition 1 - when birthday is in upcoming month
@@ -221,13 +260,18 @@ def show_upcoming_bdays(birthdays: dict):
 
         # one of two conditions must be true
         if condition1 or condition2:
+
+            # changing value of the flag, so last if statement will not execute
             zero_upcoming_bdays = False
+
+            # formating, calculating age
             bday_num = now.year - birthday.year
             birthday = birthday.strftime("%d.%m.%Y")
-            print(f'{person}: {birthday} - {bday_num}th birthday')
+            print(f'\t-{person}: {birthday} - {bday_num}th birthday')
 
+    # if the above loop did not change the value of a flag
     if zero_upcoming_bdays:
-        print('No one has a birthday in a month')
+        print('\t-No one has a birthday in a month')
 
 
 def refresh_data(filename: str):
@@ -240,6 +284,7 @@ def refresh_data(filename: str):
 
 
 def create_json(filename: str):
+    """Function that creates json file and adds first data"""
 
     data = {}
 
@@ -273,7 +318,7 @@ def show_banner():
 88888P"   "Y88888 "Y888888  "Y88888       888      "Y8888  888  888  888 888 888  888  "Y88888  "Y8888  888     
                                 888                                                                             
                            Y8b d88P                                                                             
-                            "Y88P"                                                                              
+                            "Y88P"        by Mati                                                                          
 
     """
     print(banner)
@@ -282,7 +327,8 @@ def show_banner():
 def main():
     clear_console()
     show_banner()
-    filename = 'test.json'
+    # filename = 'test.json'
+    filename = 'birthdays.json'
 
     # checking if json file exist
     if not path.isfile(filename):
@@ -290,6 +336,7 @@ def main():
         print("Welcome to the bday reminder")
         print("To continue, enter information about first person:")
         create_json(filename)
+        input('')
 
     data, birthdays = refresh_data(filename)
 
@@ -298,29 +345,38 @@ def main():
 
         clear_console()
         show_banner()
+        print("Welcome to the bday reminder")
+        show_upcoming_bdays(birthdays)
 
         # program functionalities
-        print("Welcome to the bday reminder")
-        print("1: Show persons list")
-        print("2: Check someone's birthday")
-        print("3: Add someone's birthday")
+        print('\nWhat do you want to do?:')
+        print("\t1: Show all birthdays")
+        print("\t2: Check someone's birthday")
+        print("\t3: Add someone's birthday")
+        print("\t4: Delete someone's birthday")
+        print("\tany key: exit")
 
         # asking user for choice, then executing corresponding function
         choice = input('Type corresopnding number: ')
         if choice == '1':
-            show_all_persons(birthdays)
+            clear_console()
+            show_banner()
+            show_all_bdays(birthdays)
             input('')
         elif choice == '2':
+            clear_console()
+            show_banner()
             show_person_bday(birthdays)
             input('')
         elif choice == '3':
+            clear_console()
+            show_banner()
             add_person_bday(data, filename)
             data, birthdays = refresh_data(filename)
             input('')
         elif choice == '4':
-            show_upcoming_bdays(birthdays)
-            input('')
-        elif choice == '5':
+            clear_console()
+            show_banner()
             delete_person_bday(data, filename)
             data, birthdays = refresh_data(filename)
             input('')
