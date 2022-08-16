@@ -1,5 +1,5 @@
 import json
-from os import system
+from os import system, path
 from datetime import datetime
 
 
@@ -37,54 +37,70 @@ def store_data_in_dict(data: dict):
 def show_all_persons(birthdays: dict):
     """Print list of persons we know birthdays"""
 
-    print('\nWe know birthdays of:')
+    if birthdays:
+        print('\nWe know birthdays of:')
 
-    # full names are keys in 'birthdays' dictionary
-    names_sorted = sorted(birthdays.keys())
-    for name in names_sorted:
-        print(name)
+        # full names are keys in 'birthdays' dictionary
+        names_sorted = sorted(birthdays.keys())
+        for name in names_sorted:
+            print(name)
+    else:
+        print('\nThere is no one to show')
+        print("Please add someone's birthday")
 
 
 def show_person_bday(birthdays: dict):
     """Print choosen person's birthday"""
 
-    # asking user for input
-    user_input = input("\nWho's birthday do you want to check?: ").title()
+    if birthdays:
+        # asking user for input
+        user_input = input("\nWho's birthday do you want to check?: ").title()
 
-    # formating output to DD.MM.YYYY
-    # bday = birthdays[user_input].date()
-    bday = birthdays[user_input].strftime("%d.%m.%Y")
+        # formating output to DD.MM.YYYY
+        # bday = birthdays[user_input].date()
+        bday = birthdays[user_input].strftime("%d.%m.%Y")
 
-    print(f"{user_input}'s birthday is {bday}")
+        print(f"{user_input}'s birthday is {bday}")
+    else:
+        print('\nThere is no one to show')
+        print("Please add someone's birthday")
 
 
 def delete_person_bday(data: dict, filename: str):
     """Deleting key-value pair from json dict"""
 
-    # finding dictionary key and creating variables for message at the end
-    person_to_del, first_name, last_name = find_dict_key(data)
+    if data:
+        # finding dictionary key and creating variables for message at the end
+        person_to_del, first_name, last_name = find_dict_key(data)
+        full_name = first_name + ' ' + last_name
 
-    # deleting key-value pair from dictionary
-    del data[person_to_del]
+        # if inputs does not match any existing values in data
+        if not person_to_del:
+            print(f"There is no {full_name.title()}'s birthday in memory already")
 
-    # format keys names after removing one key-value pair
-    data_formated = format_keys_names(data)
+        else:
 
-    # updating json data
-    write_to_json(filename, data_formated)
+            # deleting key-value pair from dictionary
+            del data[person_to_del]
 
-    # printing fancy message to the user
-    full_name = first_name + ' ' + last_name
-    print(f"{full_name.title()}'s birthday removed successfully")
+            # format keys names after removing one key-value pair
+            data_formated = format_keys_names(data)
+
+            # updating json data
+            write_to_json(filename, data_formated)
+
+            # printing fancy message to the user
+            print(f"{full_name.title()}'s birthday removed successfully")
+    else:
+        print("\nThere is no one to delete")
 
 
 def find_dict_key(data: dict):
     """Return key that matches user inputs"""
 
     # asking user who to delete
-    print('\nWho to delete?:')
-    first_name = input('first name: ')
-    last_name = input('last name: ')
+    full_name = input('\nWho to delete?: ')
+    first_name, last_name = full_name.split()
 
     # finding key name that matches user inputs
     for person, info in data.items():
@@ -92,8 +108,10 @@ def find_dict_key(data: dict):
         condition2 = last_name == info['last_name']
         if condition1 and condition2:
             person_to_del = person
+            return person_to_del, first_name, last_name
 
-    return person_to_del, first_name, last_name
+    # if inputs does not match
+    return False, first_name, last_name
 
 
 def format_keys_names(data: dict):
@@ -116,18 +134,22 @@ def format_keys_names(data: dict):
 def add_person_bday(data: dict, filename: str):
     """This function allows user to add someone's birthday to json"""
 
-    # creating dict with new person's info
-    new_person_info = create_new_person_dict()
+    if data:
+        # creating dict with new person's info
+        new_person_info = create_new_person_dict()
 
-    # updating 'data' with new person's info
-    data = add_key_value(data, new_person_info)
+        # updating 'data' with new person's info
+        data = add_key_value(data, new_person_info)
 
-    # updating json data
-    write_to_json(filename, data)
+        # updating json data
+        write_to_json(filename, data)
 
-    # printing fancy message to the user
-    full_name = new_person_info['first_name'] + ' ' + new_person_info['last_name']
-    print(f"{full_name.title()}'s birthday added succsessfully")
+        # printing fancy message to the user
+        full_name = new_person_info['first_name'] + ' ' + new_person_info['last_name']
+        print(f"{full_name.title()}'s birthday added succsessfully")
+
+    else:
+        create_json(filename)
 
 
 def create_new_person_dict():
@@ -176,6 +198,8 @@ def write_to_json(filename: str, data: dict):
 def show_upcoming_bdays(birthdays: dict):
     """Showing upcoming birthdays within a one month"""
 
+    zero_upcoming_bdays = True
+
     # sorting 'birthdays' by month, day
     birthdays = dict(sorted(birthdays.items(), key=lambda x: (x[1].month, x[1].day)))
 
@@ -183,6 +207,7 @@ def show_upcoming_bdays(birthdays: dict):
     now = datetime.now()
 
     print()
+    upcoming_bdays = {}
     for person, birthday in birthdays.items():
 
         # condition 1 - when birthday is in upcoming month
@@ -196,8 +221,13 @@ def show_upcoming_bdays(birthdays: dict):
 
         # one of two conditions must be true
         if condition1 or condition2:
+            zero_upcoming_bdays = False
+            bday_num = now.year - birthday.year
             birthday = birthday.strftime("%d.%m.%Y")
-            print(f'{person}: {birthday}')
+            print(f'{person}: {birthday} - {bday_num}th birthday')
+
+    if zero_upcoming_bdays:
+        print('No one has a birthday in a month')
 
 
 def refresh_data(filename: str):
@@ -207,6 +237,21 @@ def refresh_data(filename: str):
     birthdays = store_data_in_dict(data)
 
     return data, birthdays
+
+
+def create_json(filename: str):
+
+    data = {}
+
+    first_person_info = create_new_person_dict()
+
+    data['person1'] = first_person_info
+
+    write_to_json(filename, data)
+
+    # printing fancy message to the user
+    full_name = first_person_info['first_name'] + ' ' + first_person_info['last_name']
+    print(f"{full_name.title()}'s birthday added succsessfully")
 
 
 def clear_console():
@@ -235,7 +280,16 @@ def show_banner():
 
 
 def main():
-    filename = 'birthdays.json'
+    clear_console()
+    show_banner()
+    filename = 'test.json'
+
+    # checking if json file exist
+    if not path.isfile(filename):
+        # if not, create
+        print("Welcome to the bday reminder")
+        print("To continue, enter information about first person:")
+        create_json(filename)
 
     data, birthdays = refresh_data(filename)
 
@@ -246,7 +300,7 @@ def main():
         show_banner()
 
         # program functionalities
-        print()
+        print("Welcome to the bday reminder")
         print("1: Show persons list")
         print("2: Check someone's birthday")
         print("3: Add someone's birthday")
