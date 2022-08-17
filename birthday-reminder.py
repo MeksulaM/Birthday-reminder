@@ -244,7 +244,7 @@ def show_upcoming_bdays(birthdays: dict):
     birthdays = dict(sorted(birthdays.items(), key=lambda x: (x[1].month, x[1].day)))
 
     # today's date
-    now = datetime.now()
+    now = datetime.now().date()
 
     print('\nUpcoming birthdays:')
     for person, birthday in birthdays.items():
@@ -266,8 +266,14 @@ def show_upcoming_bdays(birthdays: dict):
 
             # formating, calculating age
             bday_num = now.year - birthday.year
-            birthday = birthday.strftime("%d.%m.%Y")
-            print(f'\t-{person}: {birthday} - {bday_num}th birthday')
+            birthday_str = birthday.strftime("%d.%m.%Y")
+
+            # if someone has a birthday today, letting user know about this
+            if now.day == birthday.day and now.month == birthday.month:
+                print(f'\t-{person} has a {bday_num}th birthday today')
+            else:
+                print(f'\t-{person}: {birthday_str} - {bday_num}th birthday')
+
 
     # if the above loop did not change the value of a flag
     if zero_upcoming_bdays:
